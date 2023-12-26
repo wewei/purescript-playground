@@ -1,6 +1,6 @@
--- module AEExamples.ForkJoin where
+module AEExamples.ForkJoin where
 
--- import Prelude
+import Prelude
 
 -- import Effect (Effect)
 -- import Effect.AE (launchAE)
