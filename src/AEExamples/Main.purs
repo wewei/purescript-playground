@@ -9,8 +9,8 @@ import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Now (now)
-import Effect.Promise (AE, runAE_)
-import Effect.Promise.Timer (delay)
+import Effect.AE (AE, runAE_)
+import Effect.AE.Timer (delay)
 
 delayBy :: forall a. AE a -> forall d. Duration d => d -> AE a 
 delayBy ae d = delay d >>= const ae

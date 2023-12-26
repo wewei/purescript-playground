@@ -1,4 +1,4 @@
-module Effect.Promise where
+module Effect.AE where
 
 import Prelude
 

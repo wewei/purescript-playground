@@ -1,11 +1,11 @@
-module Effect.Promise.Timer where
+module Effect.AE.Timer where
 
 import Prelude
 
 import Data.Int (round)
 import Data.Newtype (unwrap)
 import Data.Time.Duration (class Duration, Milliseconds, fromDuration)
-import Effect.Promise (AE(..), ffiNew)
+import Effect.AE (AE(..), ffiNew)
 import Effect.Timer (setTimeout)
 
 delay :: forall d. Duration d => d -> AE Unit
