@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
-import Effect.AE (AE, fork, runAE_, wait)
+import Effect.AE (fork, runAE_, wait)
 import Effect.AE.Timer (delay)
 import SpecialLog (specialLog)
 

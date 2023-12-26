@@ -59,13 +59,6 @@ instance monadEffectAE :: MonadEffect AE where
 
 wait :: forall a. Promise a -> AE a
 wait p = liftP0 p
-    -- promiseThen p
-    -- promiseThen p $ pure <<< pure
 
 fork :: forall m a. MonadEffect m => AE a -> m (Promise a)
 fork = liftEffect <<< runAE
-
--- next :: forall a b. Promise a -> (a -> AE b) -> AE b
--- next = bind <<< liftP0
-
--- infixl 1 next as ~~>
