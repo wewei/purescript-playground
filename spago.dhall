@@ -17,10 +17,11 @@ to generate this file without the comments in this block.
   , "control"
   , "datetime"
   , "effect"
-  , "maybe"
+  , "integers"
+  , "js-timers"
+  , "newtype"
   , "now"
   , "prelude"
-  , "refs"
   , "transformers"
   , "tuples"
   ]

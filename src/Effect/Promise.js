@@ -1,9 +1,13 @@
-export const ffiResolve = Promise.resolve;
+export const ffiPure = (a) => Promise.resolve(a);
 
-export const ffiNew = (f) =>
-  new Promise((resolve) => f((val) => () => resolve(val))());
+export const ffiNew = (f) => () =>
+  new Promise((resolve) => f((a) => () => resolve(a))());
 
-export const ffiThen = (p) => (f) => p.then((val) => f(val)());
+export const ffiRun = (p) => (f) => () => { p.then((a) => f(a)()) };
+
+export const ffiMap = (f) => (p) => p.then(f);
+
+export const ffiThen = (p) => (f) => () => p.then((a) => f(a)());
 
 export const ffiAlt = (p1) => (p2) =>
   new Promise((resolve) => {
@@ -11,7 +15,7 @@ export const ffiAlt = (p1) => (p2) =>
     p2.then(resolve);
   });
 
-export const ffiBoth = (tuple) => (pA) => (pB) =>
-  Promise.all([pA, pB]).then(([valA, valB]) => tuple(valA)(valB));
-
 export const ffiNever = new Promise(() => {});
+
+export const ffiApply = (pF) => (pA) =>
+  Promise.all([pF, pA]).then(([f, a]) => f(a));
