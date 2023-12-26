@@ -4,9 +4,8 @@ import Prelude
 
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
-import Effect.AE (liftP0, runAE, runAE_)
+import Effect.AE (AE, fork, runAE_, wait)
 import Effect.AE.Timer (delay)
-import Effect.Class (liftEffect)
 import SpecialLog (specialLog)
 
 main :: Effect Unit
@@ -20,12 +19,12 @@ main = runAE_ do
              \we'll use `joinFiber` to ensure all computations have \
              \finished before we do another computation."
 
-  firstFiber <- liftEffect <<< runAE $ do
+  firstFiber <- fork $ do
     specialLog $ fiber1 <> ": Waiting for 1 second until completion."
     delay $ Milliseconds 1000.0
     specialLog $ fiber1 <> ": Finished computation."
 
-  secondFiber <- liftEffect <<< runAE $ do
+  secondFiber <- fork $ do
     specialLog $ fiber2 <> ": Computation 1 (takes 300 ms)."
     delay $ Milliseconds 300.0
 
@@ -36,18 +35,18 @@ main = runAE_ do
     delay $ Milliseconds 500.0
     specialLog $ fiber2 <> ": Finished computation."
 
-  thirdFiber <- liftEffect <<< runAE $ do
+  thirdFiber <- fork $ do
     specialLog $ fiber3 <> ": Nothing to do. Just return immediately."
     specialLog $ fiber3 <> ": Finished computation."
 
-  -- liftP0 firstFiber
-  -- specialLog $ fiber1 <> " has finished. Now joining on " <> fiber2
+  wait firstFiber
+  specialLog $ fiber1 <> " has finished. Now joining on " <> fiber2
 
-  -- liftP0 secondFiber
-  -- specialLog $ fiber3 <> " has finished. Now joining on " <> fiber3
+  wait secondFiber
+  specialLog $ fiber2 <> " has finished. Now joining on " <> fiber3
 
-  -- liftP0 thirdFiber
-  -- specialLog $ fiber3 <> " has finished. All fibers have finished their \
-  --                        \computation."
+  wait thirdFiber
+  specialLog $ fiber3 <> " has finished. All fibers have finished their \
+                         \computation."
 
   specialLog "Program finished."

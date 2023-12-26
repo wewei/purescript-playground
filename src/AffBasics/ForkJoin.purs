@@ -41,7 +41,7 @@ main = launchAff_ do
   specialLog $ fiber1 <> " has finished. Now joining on " <> fiber2
 
   joinFiber secondFiber
-  specialLog $ fiber3 <> " has finished. Now joining on " <> fiber3
+  specialLog $ fiber2 <> " has finished. Now joining on " <> fiber3
 
   joinFiber thirdFiber
   specialLog $ fiber3 <> " has finished. All fibers have finished their \

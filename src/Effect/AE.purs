@@ -5,7 +5,7 @@ import Prelude
 import Control.Alternative (class Alt, class Alternative, class Plus, alt, empty)
 import Control.Apply (lift2)
 import Effect (Effect)
-import Effect.Class (class MonadEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Promise (Promise, promiseNew, promiseThen)
 
 newtype AE a = AE (Effect (Promise a))
@@ -56,6 +56,14 @@ instance monadEffectAE :: MonadEffect AE where
   liftEffect eff = AE do
     a <- eff
     pure $ pure a
+
+wait :: forall a. Promise a -> AE a
+wait p = liftP0 p
+    -- promiseThen p
+    -- promiseThen p $ pure <<< pure
+
+fork :: forall m a. MonadEffect m => AE a -> m (Promise a)
+fork = liftEffect <<< runAE
 
 -- next :: forall a b. Promise a -> (a -> AE b) -> AE b
 -- next = bind <<< liftP0
