@@ -16,8 +16,6 @@ foreign import ffiPure :: forall a. a -> Promise a
 
 foreign import ffiNew :: forall a. ((a -> Effect Unit) -> Effect Unit) -> Effect (Promise a)
 
-foreign import ffiRun :: forall a. Promise a -> (a -> Effect Unit) -> Effect Unit
-
 foreign import ffiMap :: forall a b. (a -> b) -> Promise a -> Promise b
 
 foreign import ffiThen :: forall a b. Promise a -> (a -> Effect (Promise b)) -> Effect (Promise b)

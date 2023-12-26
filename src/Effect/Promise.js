@@ -3,8 +3,6 @@ export const ffiPure = (a) => Promise.resolve(a);
 export const ffiNew = (f) => () =>
   new Promise((resolve) => f((a) => () => resolve(a))());
 
-export const ffiRun = (p) => (f) => () => { p.then((a) => f(a)()) };
-
 export const ffiMap = (f) => (p) => p.then(f);
 
 export const ffiThen = (p) => (f) => () => p.then((a) => f(a)());
