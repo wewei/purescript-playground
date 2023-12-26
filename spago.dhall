@@ -22,7 +22,6 @@ to generate this file without the comments in this block.
   , "newtype"
   , "now"
   , "prelude"
-  , "transformers"
   , "tuples"
   ]
 , packages = ./packages.dhall
