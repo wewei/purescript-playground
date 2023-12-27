@@ -4,12 +4,13 @@ import Prelude
 
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
-import Effect.AE (fork, runAE_, wait)
+import Effect.AE (fork, wait)
 import Effect.AE.Timer (delay)
+import Effect.Promise (runPromiseAE_)
 import SpecialLog (specialLog)
 
 main :: Effect Unit
-main = runAE_ do
+main = runPromiseAE_ do
   let
     fiber1 = "Fiber 1"
     fiber2 = "Fiber 2"

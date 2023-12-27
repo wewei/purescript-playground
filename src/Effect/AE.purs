@@ -5,60 +5,61 @@ import Prelude
 import Control.Alternative (class Alt, class Alternative, class Plus, alt, empty)
 import Control.Apply (lift2)
 import Effect (Effect)
+import Effect.AE.Class (class AsyncTask, new, next)
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Promise (Promise, promiseNew, promiseThen)
 
-newtype AE a = AE (Effect (Promise a))
+newtype AE :: forall k. (k -> Type) -> k -> Type
+newtype AE t a = AE (Effect (t a))
 
-runAE :: forall a. AE a -> Effect (Promise a)
+runAE :: forall t a. AsyncTask t => AE t a -> Effect (t a)
 runAE (AE eff) = eff
 
-runAE_ :: forall a. AE a -> Effect Unit
+runAE_ :: forall t a. AsyncTask t => AE t a -> Effect Unit
 runAE_ = void <<< runAE
 
-makeAE :: forall a. ((a -> Effect Unit) -> Effect Unit) -> AE a
-makeAE = AE <<< promiseNew
+makeAE :: forall t a. AsyncTask t => ((a -> Effect Unit) -> Effect Unit) -> AE t a
+makeAE = AE <<< new
 
-liftP0 :: forall a. Promise a -> AE a
+liftP0 :: forall t a. AsyncTask t => t a -> AE t a
 liftP0 = AE <<< pure
 
-liftP1 :: forall a b. (Promise a -> Promise b) -> AE a -> AE b
+liftP1 :: forall t a b. AsyncTask t => (t a -> t b) -> AE t a -> AE t b
 liftP1 f = AE <<< map f <<< runAE
 
-liftP2 :: forall a b c. (Promise a -> Promise b -> Promise c) -> AE a -> AE b -> AE c
+liftP2 :: forall t a b c. AsyncTask t => (t a -> t b -> t c) -> AE t a -> AE t b -> AE t c
 liftP2 f aeA aeB = AE $ lift2 f (runAE aeA) (runAE aeB)
 
-instance functorAE :: Functor AE where
+instance functorAE :: AsyncTask t => Functor (AE t) where
   map = liftP1 <<< map
 
-instance applyAE :: Apply AE where
+instance applyAE :: AsyncTask t => Apply (AE t) where
   apply = liftP2 apply
 
-instance applicativeAE :: Applicative AE where
+instance applicativeAE :: AsyncTask t => Applicative (AE t) where
   pure = liftP0 <<< pure
 
-instance bindAE :: Bind AE where
+instance bindAE :: AsyncTask t => Bind (AE t) where
   bind ae f = AE $ do
     p <- runAE ae
-    promiseThen p $ runAE <<< f
+    next p $ runAE <<< f
 
-instance Monad AE
+instance AsyncTask t => Monad (AE t)
 
-instance altAE :: Alt AE where
+instance altAE :: AsyncTask t => Alt (AE t) where
   alt = liftP2 alt
 
-instance plusAE :: Plus AE where
+instance plusAE :: AsyncTask t => Plus (AE t) where
   empty = AE $ pure empty
 
-instance alternativeAE :: Alternative AE
+instance alternativeAE :: AsyncTask t => Alternative (AE t)
 
-instance monadEffectAE :: MonadEffect AE where
+instance monadEffectAE :: AsyncTask t => MonadEffect (AE t) where
   liftEffect eff = AE do
     a <- eff
     pure $ pure a
 
-wait :: forall a. Promise a -> AE a
+wait :: forall t a. AsyncTask t => t a -> AE t a
 wait p = liftP0 p
 
-fork :: forall m a. MonadEffect m => AE a -> m (Promise a)
+fork :: forall t m a. AsyncTask t => MonadEffect m => AE t a -> m (t a)
 fork = liftEffect <<< runAE

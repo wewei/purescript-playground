@@ -1,14 +1,15 @@
 module Effect.Promise
   ( Promise
-  , promiseNew
-  , promiseThen
-  )
-  where
+  , runPromiseAE
+  , runPromiseAE_
+  ) where
 
 import Prelude
 
 import Control.Alternative (class Alt, class Alternative, class Plus)
 import Effect (Effect)
+import Effect.AE (AE, runAE, runAE_)
+import Effect.AE.Class (class AsyncTask)
 
 foreign import data Promise :: Type -> Type
 
@@ -43,8 +44,12 @@ instance plusPromise :: Plus Promise where
 
 instance alternativePromise :: Alternative Promise
 
-promiseNew :: forall a. ((a -> Effect Unit) -> Effect Unit) -> Effect (Promise a)
-promiseNew = ffiNew
+instance asyncTaskPromise :: AsyncTask Promise where
+  new  = ffiNew
+  next = ffiThen
 
-promiseThen :: forall a b. Promise a -> (a -> Effect (Promise b)) -> Effect (Promise b)
-promiseThen = ffiThen
+runPromiseAE :: forall a. AE Promise a -> Effect (Promise a)
+runPromiseAE = runAE
+
+runPromiseAE_ :: forall a. AE Promise a -> Effect Unit
+runPromiseAE_ = runAE_
