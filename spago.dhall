@@ -20,6 +20,7 @@ to generate this file without the comments in this block.
   , "effect"
   , "integers"
   , "js-timers"
+  , "maybe"
   , "newtype"
   , "now"
   , "prelude"
