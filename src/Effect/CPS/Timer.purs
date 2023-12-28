@@ -1,4 +1,4 @@
-module Effect.Monad.CPS.Timer where
+module Effect.CPS.Timer where
 
 import Prelude
 
@@ -7,7 +7,7 @@ import Data.Int (round)
 import Data.Newtype (unwrap)
 import Data.Time.Duration (class Duration, Milliseconds, fromDuration)
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Monad.CPS.Proc (Proc, proc)
+import Effect.CPS.Proc (Proc, proc)
 import Effect.Now (now)
 import Effect.Timer (setTimeout)
 

@@ -1,6 +1,6 @@
-module Effect.Monad.CPS.PFiber where
+module Effect.CPS.PFiber where
 
-import Effect.Monad.CPS.Proc (class Fiber, Proc, TProc, launch, fork, proc, runProc)
+import Effect.CPS.Proc (class Fiber, Proc, TProc, launch, fork, proc, runProc)
 import Prelude
 
 import Effect (Effect)

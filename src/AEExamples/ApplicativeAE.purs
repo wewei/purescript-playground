@@ -7,7 +7,7 @@ import Data.Tuple.Apply ((<&>))
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
-import Effect.Monad.CPS (delayedBy, launchPFiber_, timing)
+import Effect.CPS (delayedBy, launchPFiber_, timing)
 
 main :: Effect Unit
 main = launchPFiber_ $ timing logSeconds do

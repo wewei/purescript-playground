@@ -1,4 +1,4 @@
-module Effect.Monad.CPS.Proc where
+module Effect.CPS.Proc where
 
 import Prelude
 
