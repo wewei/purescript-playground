@@ -5,7 +5,7 @@ export const ffiNew = (f) => () =>
 
 export const ffiMap = (f) => (p) => [p[0].then(f)];
 
-export const ffiThen = (p) => (f) => () => [p[0].then((a) => f(a)()[0])];
+export const ffiThen = (p) => (f) => () => [p[0].then((a) => f(a)())];
 
 export const ffiAlt = (p1) => (p2) => [
     new Promise((resolve) => {

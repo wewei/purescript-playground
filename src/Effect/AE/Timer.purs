@@ -2,6 +2,7 @@ module Effect.AE.Timer where
 
 import Prelude
 
+import Control.Monad.Cont (ContT(..))
 import Data.DateTime.Instant (diff)
 import Data.Int (round)
 import Data.Newtype (unwrap)
@@ -13,7 +14,7 @@ import Effect.Now (now)
 import Effect.Timer (setTimeout)
 
 delay :: forall d. Duration d => d -> forall t. AsyncTask t => AE t Unit
-delay d = makeAE \res -> do
+delay d = makeAE <<< ContT $ \res -> do
   let ms = round $ unwrap (fromDuration d :: Milliseconds)
   void $ setTimeout ms (res unit)
 

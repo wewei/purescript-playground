@@ -7,6 +7,7 @@ module Effect.Promise
 import Prelude
 
 import Control.Alternative (class Alt, class Alternative, class Plus)
+import Control.Monad.Cont (ContT(..), runContT)
 import Effect (Effect)
 import Effect.AE (AE, runAE, runAE_)
 import Effect.AE.Class (class AsyncTask)
@@ -19,7 +20,7 @@ foreign import ffiNew :: forall a. ((a -> Effect Unit) -> Effect Unit) -> Effect
 
 foreign import ffiMap :: forall a b. (a -> b) -> Promise a -> Promise b
 
-foreign import ffiThen :: forall a b. Promise a -> (a -> Effect (Promise b)) -> Effect (Promise b)
+foreign import ffiThen :: forall a. Promise a -> (a -> Effect Unit) -> Effect Unit
 
 foreign import ffiAlt :: forall a. Promise a -> Promise a -> Promise a
 
@@ -45,8 +46,8 @@ instance plusPromise :: Plus Promise where
 instance alternativePromise :: Alternative Promise
 
 instance asyncTaskPromise :: AsyncTask Promise where
-  new  = ffiNew
-  next = ffiThen
+  runCPS  = ffiNew <<< runContT
+  waitCPS = ContT <<< ffiThen
 
 runPromiseAE :: forall a. AE Promise a -> Effect (Promise a)
 runPromiseAE = runAE

@@ -4,8 +4,9 @@ import Prelude
 
 import Control.Alternative (class Alt, class Alternative, class Plus, alt, empty)
 import Control.Apply (lift2)
+import Control.Monad.Cont (ContT(..), runContT)
 import Effect (Effect)
-import Effect.AE.Class (class AsyncTask, new, next)
+import Effect.AE.Class (class AsyncTask, runCPS, waitCPS)
 import Effect.Class (class MonadEffect, liftEffect)
 
 newtype AE :: forall k. (k -> Type) -> k -> Type
@@ -17,8 +18,8 @@ runAE (AE eff) = eff
 runAE_ :: forall t a. AsyncTask t => AE t a -> Effect Unit
 runAE_ = void <<< runAE
 
-makeAE :: forall t a. AsyncTask t => ((a -> Effect Unit) -> Effect Unit) -> AE t a
-makeAE = AE <<< new
+makeAE :: forall t a. AsyncTask t => ContT Unit Effect a -> AE t a
+makeAE = AE <<< runCPS
 
 liftP0 :: forall t a. AsyncTask t => t a -> AE t a
 liftP0 = AE <<< pure
@@ -39,9 +40,15 @@ instance applicativeAE :: AsyncTask t => Applicative (AE t) where
   pure = liftP0 <<< pure
 
 instance bindAE :: AsyncTask t => Bind (AE t) where
-  bind ae f = AE $ do
-    p <- runAE ae
-    next p $ runAE <<< f
+  bind :: forall a b. AE t a -> (a -> AE t b) -> AE t b
+  bind ae f = AE do -- Effect
+    tA <- runAE ae
+    runCPS do -- ContT
+      a <- waitCPS tA
+      ContT $ \g -> do -- Effect
+        (tB :: t b) <- runAE (f a)
+        runContT (waitCPS tB) g
+
 
 instance AsyncTask t => Monad (AE t)
 
