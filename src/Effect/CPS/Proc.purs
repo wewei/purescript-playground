@@ -1,4 +1,16 @@
-module Effect.CPS.Proc where
+module Effect.CPS.Proc
+  ( Proc(..)
+  , ProcCallback
+  , class Fiber
+  , fork
+  , memoize
+  , never
+  , proc
+  , runProc
+  , launch
+  , wait
+  )
+  where
 
 import Prelude
 
@@ -9,17 +21,18 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Ref (modify_, new, read)
 
-type TProc a = (a -> Effect Unit) -> Effect Unit
+-- | Type alias for the CPS function with `Effect Unit` return type
+type ProcCallback a = (a -> Effect Unit) -> Effect Unit
 
-newtype Proc a = Proc (TProc a)
+newtype Proc a = Proc (ProcCallback a)
 
-proc :: forall a. TProc a -> Proc a
+proc :: forall a. ProcCallback a -> Proc a
 proc = Proc
 
-runProc :: forall a. Proc a -> TProc a
+runProc :: forall a. Proc a -> ProcCallback a
 runProc (Proc prc) = prc
 
-instance newtypeProc :: Newtype (Proc a) (TProc a)
+instance newtypeProc :: Newtype (Proc a) (ProcCallback a)
 
 instance functorProc :: Functor Proc where
     map f prcA = proc \r -> runProc prcA (r <<< f)

@@ -1,15 +1,15 @@
 module Effect.CPS.PFiber where
 
-import Effect.CPS.Proc (class Fiber, Proc, TProc, launch, fork, proc, runProc)
 import Prelude
 
 import Effect (Effect)
+import Effect.CPS.Proc (class Fiber, Proc, ProcCallback, fork, launch, proc, runProc)
 
 foreign import data PFiber :: Type -> Type
 
-foreign import ffiLaunchPFiber :: forall a. TProc a -> Effect (PFiber a)
+foreign import ffiLaunchPFiber :: forall a. ProcCallback a -> Effect (PFiber a)
 
-foreign import ffiWaitPFiber :: forall a. PFiber a -> TProc a
+foreign import ffiWaitPFiber :: forall a. PFiber a -> ProcCallback a
 
 instance fiberPFiber :: Fiber PFiber where
     launch = runProc >>> ffiLaunchPFiber
