@@ -2,6 +2,8 @@ module Effect.Promise
   ( Promise
   , runPromiseAE
   , runPromiseAE_
+  , runPromiseAE2
+  , runPromiseAE2_
   ) where
 
 import Prelude
@@ -10,7 +12,7 @@ import Control.Alternative (class Alt, class Alternative, class Plus)
 import Control.Monad.Cont (ContT(..), runContT)
 import Effect (Effect)
 import Effect.AE (AE, runAE, runAE_)
-import Effect.AE.Class (class AsyncTask)
+import Effect.AE.Class (class AsyncTask, class Fiber, AE2)
 
 foreign import data Promise :: Type -> Type
 
@@ -54,3 +56,13 @@ runPromiseAE = runAE
 
 runPromiseAE_ :: forall a. AE Promise a -> Effect Unit
 runPromiseAE_ = runAE_
+
+instance fiberPromise :: Fiber Promise where
+  fork = runContT >>> ffiNew >>> bind >>> ContT
+  wait = ffiThen >>> ContT
+
+runPromiseAE2 :: forall a. AE2 a -> Effect (Promise a)
+runPromiseAE2 = ffiNew <<< runContT
+
+runPromiseAE2_ :: forall a. AE2 a -> Effect Unit
+runPromiseAE2_ = void <<< runPromiseAE2

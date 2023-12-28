@@ -8,7 +8,7 @@ import Data.Int (round)
 import Data.Newtype (unwrap)
 import Data.Time.Duration (class Duration, Milliseconds, fromDuration)
 import Effect.AE (AE, makeAE)
-import Effect.AE.Class (class AsyncTask)
+import Effect.AE.Class (class AsyncTask, AE2)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Now (now)
 import Effect.Timer (setTimeout)
@@ -29,3 +29,10 @@ timing f ae = do
   f (diff end start)
   pure val
 
+delay2 :: forall d. Duration d => d -> AE2 Unit
+delay2 d = ContT $ \res -> do
+  let ms = round $ unwrap (fromDuration d :: Milliseconds)
+  void $ setTimeout ms (res unit)
+
+delayedBy2 :: forall a. AE2 a -> forall d. Duration d => d -> AE2 a
+delayedBy2 ae d = delay2 d >>= const ae
