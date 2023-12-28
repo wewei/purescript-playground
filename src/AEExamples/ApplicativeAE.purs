@@ -2,10 +2,11 @@ module AEExamples.ApplicativeAE where
 
 import Prelude
 
+import Control.Alternative ((<|>))
 import Data.Time.Duration (class Duration, Seconds(..), convertDuration)
 import Data.Tuple.Apply ((<&>))
 import Effect (Effect)
-import Effect.CPS (PFiber, Proc, delayedBy, fork, launchPFiber_, timing, wait)
+import Effect.CPS (PFiber, Proc, delayedBy, fork, launchPFiber_, timing, wait, delay)
 import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
 
@@ -29,6 +30,14 @@ main = launchPFiber_ $ timing logSeconds do
     log "Wait 1st PFiber y"
     wait y
     log "Wait 2nd PFiber y"
+    let prcL = do delay $ Seconds 0.2
+                  log "Running Proc Left"
+                  pure "Left"
+    let prcR = do delay $ Seconds 0.3
+                  log "Running Proc Right"
+                  pure "Right"
+    (val :: PFiber String) <- fork (prcL <|> prcR)
+    wait val >>= ("Result: " <> _) >>> log
     log "Program Finished"
 
 logSeconds :: forall m d. MonadEffect m => Duration d => d -> m Unit
