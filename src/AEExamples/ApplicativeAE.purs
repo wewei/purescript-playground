@@ -7,10 +7,10 @@ import Data.Tuple.Apply ((<&>))
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
-import Effect.Monad.CPS (delayedBy, launchPFiberProc_, timing)
+import Effect.Monad.CPS (delayedBy, launchPFiber_, timing)
 
 main :: Effect Unit
-main = launchPFiberProc_ $ timing logSeconds do
+main = launchPFiber_ $ timing logSeconds do
     let w3 = log "Wait 3.0" `delayedBy` Seconds 3.0
         w2 = log "Wait 2.0" `delayedBy` Seconds 2.0
     void $ (w3 >>= const w2) <&> (w2 >>= const w3)

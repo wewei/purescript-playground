@@ -75,8 +75,5 @@ class Fiber f where
     launch :: forall a. Proc a -> Effect (f a)
     wait :: forall a. f a -> Proc a
 
-launchProc :: forall f a. Fiber f => Proc a -> Effect (f a)
-launchProc = launch
-
 fork :: forall f a. Fiber f => Proc a -> Proc (f a)
 fork = liftEffect <<< launch
