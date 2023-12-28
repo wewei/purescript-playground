@@ -8,9 +8,10 @@ import Prelude
 
 import Control.Alternative (class Alt, class Alternative, class Plus)
 import Control.Monad.Cont (ContT(..), runContT)
+import Effect (Effect)
 import Effect.AE (AE, runAE, runAE_)
-import Effect.AE.Class (class AsyncTask, class Fiber, AE2)
-import Effect.AE.Class (class AsyncTask, class Fiber)
+import Effect.AE.Class (class AsyncTask)
+
 foreign import data Promise :: Type -> Type
 
 foreign import ffiPure :: forall a. a -> Promise a
@@ -45,15 +46,11 @@ instance plusPromise :: Plus Promise where
 instance alternativePromise :: Alternative Promise
 
 instance asyncTaskPromise :: AsyncTask Promise where
-  runCPS  = ffiNew <<< runContT
-  waitCPS = ContT <<< ffiThen
+  forkTask  = ffiNew <<< runContT
+  waitTask = ContT <<< ffiThen
 
 runPromiseAE :: forall a. AE Promise a -> Effect (Promise a)
 runPromiseAE = runAE
 
 runPromiseAE_ :: forall a. AE Promise a -> Effect Unit
 runPromiseAE_ = runAE_
-
-instance fiberPromise :: Fiber Promise where
-  fork = runContT >>> ffiNew >>> bind >>> ContT
-  wait = ffiThen >>> ContT

@@ -6,7 +6,7 @@ import Control.Alternative (class Alt, class Alternative, class Plus, alt, empty
 import Control.Apply (lift2)
 import Control.Monad.Cont (ContT(..), runContT)
 import Effect (Effect)
-import Effect.AE.Class (class AsyncTask, runCPS, waitCPS)
+import Effect.AE.Class (class AsyncTask, forkTask, waitTask)
 import Effect.Class (class MonadEffect, liftEffect)
 
 newtype AE :: forall k. (k -> Type) -> k -> Type
@@ -19,7 +19,7 @@ runAE_ :: forall t a. AsyncTask t => AE t a -> Effect Unit
 runAE_ = void <<< runAE
 
 makeAE :: forall t a. AsyncTask t => ContT Unit Effect a -> AE t a
-makeAE = AE <<< runCPS
+makeAE = AE <<< forkTask
 
 liftP0 :: forall t a. AsyncTask t => t a -> AE t a
 liftP0 = AE <<< pure
@@ -43,12 +43,11 @@ instance bindAE :: AsyncTask t => Bind (AE t) where
   bind :: forall a b. AE t a -> (a -> AE t b) -> AE t b
   bind ae f = AE do -- Effect
     tA <- runAE ae
-    runCPS do -- ContT
-      a <- waitCPS tA
+    forkTask do -- ContT
+      a <- waitTask tA
       ContT $ \g -> do -- Effect
         (tB :: t b) <- runAE (f a)
-        runContT (waitCPS tB) g
-
+        runContT (waitTask tB) g
 
 instance AsyncTask t => Monad (AE t)
 
@@ -65,8 +64,11 @@ instance monadEffectAE :: AsyncTask t => MonadEffect (AE t) where
     a <- eff
     pure $ pure a
 
-wait :: forall t a. AsyncTask t => t a -> AE t a
-wait p = liftP0 p
+class Alternative f <= Fiber f where
+  fork :: forall a. AE f a -> AE f (f a)
+  wait :: forall a. f a -> AE f a
 
-fork :: forall t m a. AsyncTask t => MonadEffect m => AE t a -> m (t a)
-fork = liftEffect <<< runAE
+instance AsyncTask f => Fiber f where
+  fork = liftEffect <<< runAE
+  wait = liftP0
+
