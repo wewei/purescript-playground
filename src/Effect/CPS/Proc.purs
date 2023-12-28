@@ -77,3 +77,18 @@ class Fiber f where
 
 fork :: forall f a. Fiber f => Proc a -> Proc (f a)
 fork = liftEffect <<< launch
+
+memoize :: forall a. Proc a -> Effect (Proc a)
+memoize prc = do
+        ref <- new Nothing
+        pure $ proc
+            \r -> read ref >>=
+            case _ of
+                Just a  -> r a
+                Nothing -> runProc prc \a -> do
+                    modify_ (const $ Just a) ref
+                    r a
+
+instance Fiber Proc where
+    launch = memoize
+    wait = identity
