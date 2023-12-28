@@ -18,13 +18,18 @@ main = launchPFiber_ $ timing logSeconds do
     let a = pure 1 `delayedBy` Seconds 0.3
     r <- f <*> a
     log $ show r
-    (x :: Proc Unit) <- fork w10
-    (y :: Proc Unit) <- fork w10
+    (x :: Proc Unit) <- fork $ w10 >>= const (log "Complete Proc x")
+    (y :: PFiber Unit) <- fork $ w10 >>= const (log "Complete PFiber y")
     log "Forked"
     wait x
+    log "Wait 1st Proc x"
+    wait x
+    log "Wait 2nd Proc x"
     wait y
+    log "Wait 1st PFiber y"
     wait y
-    log "Finished"
+    log "Wait 2nd PFiber y"
+    log "Program Finished"
 
 logSeconds :: forall m d. MonadEffect m => Duration d => d -> m Unit
 logSeconds d = do
