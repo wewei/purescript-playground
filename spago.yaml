@@ -1,0 +1,22 @@
+package:
+  dependencies:
+  - aff
+  - affjax
+  - console
+  - control
+  - datetime
+  - effect
+  - integers
+  - js-timers
+  - maybe
+  - newtype
+  - now
+  - prelude
+  - refs
+  - transformers
+  - tuples
+  name: my-project
+workspace:
+  extra_packages: {}
+  package_set:
+    url: https://raw.githubusercontent.com/purescript/package-sets/psc-0.15.13-20231223/packages.json
