@@ -1,4 +1,11 @@
-module Effect.CPS.PFiber where
+module Effect.CPS.PFiber
+  ( PFiber
+  , forkPFiber
+  , forkPFiber_
+  , launchPFiber
+  , launchPFiber_
+  )
+  where
 
 import Prelude
 
