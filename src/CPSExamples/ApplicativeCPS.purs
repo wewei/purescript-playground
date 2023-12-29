@@ -2,12 +2,12 @@ module CPSExamples.ApplicativeCPS where
 
 import Prelude
 
+import CPSExamples.Utility (logSeconds)
 import Control.Alternative ((<|>))
-import Data.Time.Duration (class Duration, Seconds(..), convertDuration)
+import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Apply ((<&>))
 import Effect (Effect)
 import Effect.CPS (PFiber, Proc, delayedBy, fork, launchPFiber_, timing, wait, delay)
-import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
 
 main :: Effect Unit
@@ -39,9 +39,3 @@ main = launchPFiber_ $ timing logSeconds do
     (val :: PFiber String) <- fork (prcL <|> prcR)
     wait val >>= ("Result: " <> _) >>> log
     log "Program Finished"
-
-logSeconds :: forall m d. MonadEffect m => Duration d => d -> m Unit
-logSeconds d = do
-    let sec :: Seconds
-        sec = convertDuration d
-    log $ show sec

@@ -38,9 +38,11 @@ runProc (Proc prc) = prc
 
 instance newtypeProc :: Newtype (Proc a) (ProcCallback a)
 
+foreign import stackSafe :: forall a. (a -> Effect Unit) -> a -> Effect Unit
+
 instance functorProc :: Functor Proc where
     -- | Map `Proc`s with the given function
-    map f prcA = proc \r -> runProc prcA (r <<< f)
+    map f prcA = proc \r -> runProc prcA (stackSafe r <<< f)
 
 instance applyProc :: Apply Proc where
     -- | Run `prcF` and `prcA` in parallel, return when both `Proc`s are
@@ -50,10 +52,10 @@ instance applyProc :: Apply Proc where
         refA <- new Nothing
         runProc prcF \f -> read refA >>= case _ of
             Nothing -> modify_ (const $ Just f) refF
-            Just a  -> r (f a)
+            Just a  -> stackSafe r (f a)
         runProc prcA \a -> read refF >>= case _ of
             Nothing -> modify_ (const $ Just a) refA
-            Just f  -> r (f a)
+            Just f  -> stackSafe r (f a)
 
 instance applicativeProc :: Applicative Proc where
     -- | Create a `Proc` that complete immediately with the given value.
@@ -62,7 +64,7 @@ instance applicativeProc :: Applicative Proc where
 instance bindProc :: Bind Proc where
     -- | Chain up `Procs`.
     bind prcA f = proc \r -> runProc prcA
-                       \a -> runProc (f a) r
+                       \a -> runProc (f a) (stackSafe r)
 
 instance monadProc :: Monad Proc
 
@@ -83,7 +85,7 @@ instance altProc :: Alt Proc where
     -- | Race 2 `Proc`s
     alt prcX prcY = proc
         \r -> do
-            r1 <- once r
+            r1 <- once $ stackSafe r
             runProc prcX r1
             runProc prcY r1
 
@@ -116,10 +118,10 @@ memoize prc = do
         pure $ proc
             \r -> read ref >>=
             case _ of
-                Just a  -> r a
+                Just a  -> stackSafe r a
                 Nothing -> runProc prc \a -> do
                     modify_ (const $ Just a) ref
-                    r a
+                    stackSafe r a
 
 -- | A `Proc` itself is an instance of `Fiber`. It will be suspended on
 -- | `launch`, and executed synchronously on `wait`
