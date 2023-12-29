@@ -1,4 +1,4 @@
-module AEExamples.ApplicativeAE where
+module CPSExamples.ApplicativeCPS where
 
 import Prelude
 
